@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Liste des examens</title>
+</head>
+<body>
+  <h1>Examens enregistrés</h1>
+  <input type="text" id="proprietaire" placeholder="Nom du propriétaire">
+  <button id="afficher">Afficher</button>
+  <div id="resultat"></div>
+
+  <script>
+    // Ajouter un écouteur d'événement pour afficher les examens du propriétaire
+    document.getElementById('afficher').addEventListener('click', () => {
+      const prop = document.getElementById('proprietaire').value;
+      const exams = JSON.parse(localStorage.getItem('examens_' + prop)) || [];
+      const container = document.getElementById('resultat');
+      container.innerHTML = '';  // Réinitialiser le contenu du résultat
+
+      if (exams.length === 0) {
+        container.innerHTML = '<p>Aucun examen enregistré pour ce propriétaire.</p>';
+      } else {
+        exams.forEach((exam, i) => {
+          const div = document.createElement('div');
+          
+          // Afficher le nom, la durée et la description de l'examen
+          div.innerHTML = `
+            <h2>${exam.nom} (${exam.duree} min)</h2>
+            <p>${exam.description}</p>
+          `;
+          
+          // Vérifier si l'examen a des questions
+          if (exam.questions && exam.questions.length > 0) {
+            // Afficher les questions
+            const questionsList = exam.questions.map(q => {
+              return `
+                <li>
+                  <strong>${q.enonce}</strong><br>
+                  Durée: ${q.duree} secondes<br>
+                  Points: ${q.points}<br>
+                  Propositions: 
+                  <ul>
+                    ${q.propositions.map(p => `
+                      <li>${p.texte} ${p.correcte ? "(Correcte)" : ""}</li>
+                    `).join('')}
+                  </ul>
+                </li>
+              `;
+            }).join('');
+
+            div.innerHTML += `<ul>${questionsList}</ul>`;
+          } else {
+            div.innerHTML += '<p>Aucune question disponible pour cet examen.</p>';
+          }
+
+          container.appendChild(div);
+        });
+      }
+    });
+  </script>
+</body>
+</html>
